@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "ptb-jobs-persistence"
+version = "0.1.0"
+description = ""
+authors = ["Dmitry Kirilovskiy <dikirilovsiy@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+loguru = "^0.7.2"
+python-telegram-bot = {extras = ["job-queue"], version = "^20.7"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
