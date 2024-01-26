@@ -77,7 +77,7 @@ def save_jobs_to_file(job_queue: PTBJobQueue, filename: str) -> bool:
 
 def restore_jobs_from_file(job_queue: PTBJobQueue, filename: str) -> bool:
     if not os.path.exists(filename):
-        logger.error(f"File {filename} does not exist")
+        logger.warning(f"File {filename} does not exist")
         return None
     with open(filename, 'rb') as f:
         unpickler = pickle.Unpickler(f)
@@ -88,8 +88,7 @@ def restore_jobs_from_file(job_queue: PTBJobQueue, filename: str) -> bool:
             data = None
             logger.info(f"{filename} is empty")
     if not data:
-        logger.warning(f"Nothing to restore. If restore information was updated after FileJobStore was created, "
-                       f"read_state_from_persistence() must be called first")
+        logger.warning(f"Nothing to restore.")
         return False
     for job in data:
         restore_state(job_queue, job)

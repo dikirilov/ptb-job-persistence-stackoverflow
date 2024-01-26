@@ -7,10 +7,6 @@ from loguru import logger
 from job_serialization import save_jobs_to_file, restore_jobs_from_file
 import os
 
-# from jobstores import PersistentJobStore
-# from job_persistence import FileJobPersistence
-
-
 TOKEN = os.getenv("TOKEN")
 FILENAME = "jobs.pkl"
 job_queue = None
@@ -54,7 +50,11 @@ async def remove_ticker(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 def scheduler_event_catcher(event: JobEvent):
     logger.debug(f"Scheduler event: {event}, job id: {event.job_id}, jobstore name: {event.jobstore}, current job queue: {job_queue}")
-    save_jobs_to_file(job_queue, FILENAME)
+    if job_queue:
+        logger.info(f"job queue is defined, saving jobs to {FILENAME}")
+        save_jobs_to_file(job_queue, FILENAME)
+    else:
+        logger.warning(f"job queue is not defined")
 
 
 def main():
@@ -63,16 +63,12 @@ def main():
         return
     app = ApplicationBuilder().token(TOKEN).build()
     app.job_queue.scheduler.add_listener(scheduler_event_catcher, EVENT_JOB_REMOVED | EVENT_JOB_ADDED)
-    # jobstore_alias = "default"
-    # app.job_queue.scheduler.add_jobstore(PersistentJobStore(FileJobPersistence("jobs.pkl")), jobstore_alias)
     app.add_handler(CommandHandler("add_ticker", add_ticker))
     app.add_handler(CommandHandler("remove_ticker", remove_ticker))
     logger.info('Handlers added')
     global job_queue
     job_queue = app.job_queue
     restore_jobs_from_file(job_queue, FILENAME)
-
-    # app.job_queue.scheduler._jobstores[jobstore_alias].restore(job_queue=app.job_queue)
 
     logger.info('Starting polling...')
     app.run_polling()
